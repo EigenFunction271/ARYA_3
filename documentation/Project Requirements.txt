@@ -1,0 +1,37 @@
+1. Project Requirements Document
+Objective
+Build a RAG (Retrieval-Augmented Generation) chatbot that allows authorized users to upload documents, interact with the chatbot, and embed the chat interface into a frontend web app.
+
+Features
+User Authentication:
+
+OAuth2-based login with JWT tokens.
+
+User roles: Admin and User.
+
+Document Upload:
+
+Admins can upload text documents for training the chatbot.
+
+Chat Interface:
+
+Users can interact with the chatbot via a web interface.
+
+The chatbot retrieves relevant information from uploaded documents.
+
+Scalable Vector Storage:
+
+Use Pinecone for scalable vector storage and retrieval.
+
+Frontend:
+
+Streamlit-based web interface for document upload and chat.
+
+Embeddable chat interface for external web apps.
+
+Non-Functional Requirements
+Scalable backend using FastAPI.
+
+Secure authentication and authorization.
+
+Easy-to-use frontend with Streamlit.

@@ -1,0 +1,34 @@
+App Flow and Functionality Document
+User Flow
+Login:
+
+Users log in via the Streamlit frontend.
+
+Admins and users have different access levels.
+
+Document Upload (Admin Only):
+
+Admins upload text documents.
+
+Documents are processed and stored in Pinecone.
+
+Chat:
+
+Users ask questions via the chat interface.
+
+The chatbot retrieves relevant information from the documents and generates responses.
+
+Functionality
+Backend:
+
+Handles document upload and processing.
+
+Manages user authentication and authorization.
+
+Provides API endpoints for chat and document upload.
+
+Frontend:
+
+Provides a user-friendly interface for login, document upload, and chat.
+
+Communicates with the backend via API calls.

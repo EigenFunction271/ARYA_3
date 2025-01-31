@@ -1,0 +1,46 @@
+Tech Stack and Packages Document
+Backend
+Framework: FastAPI
+
+Authentication: OAuth2 with JWT
+
+Vector Storage: Pinecone
+
+Language Model: OpenAI
+
+Document Processing: LangChain
+
+Utilities: Python-JOSE, Passlib, Pydantic
+
+Frontend
+Framework: Streamlit
+
+Communication: HTTP requests to FastAPI backend
+
+Development Tools
+Environment Management: .env file
+
+Containerization: Docker (optional)
+
+Version Control: Git
+
+Packages
+Backend:
+
+plaintext
+Copy
+fastapi==0.95.2
+uvicorn==0.22.0
+python-multipart==0.0.6
+langchain==0.0.200
+openai==0.27.8
+pinecone-client==2.2.2
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+pydantic==1.10.7
+requests==2.28.2
+Frontend:
+
+plaintext
+Copy
+streamlit==1.24.0

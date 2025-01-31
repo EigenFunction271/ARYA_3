@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "rules": [
+    {
+      "name": "Backend",
+      "path": "backend/",
+      "language": "python",
+      "tasks": [
+        {
+          "name": "Run FastAPI Server",
+          "command": "uvicorn main:app --reload"
+        }
+      ]
+    },
+    {
+      "name": "Frontend",
+      "path": "frontend/",
+      "language": "python",
+      "tasks": [
+        {
+          "name": "Run Streamlit App",
+          "command": "streamlit run app.py"
+        }
+      ]
+    }
+  ]
+}
