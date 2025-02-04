@@ -10,4 +10,4 @@ class Token(BaseModel):
     token_type: str
 
 class Query(BaseModel):
-    query: str
+    query: str 

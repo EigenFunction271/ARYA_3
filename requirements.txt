@@ -5,7 +5,6 @@ python-multipart==0.0.6
 
 # LangChain and OpenAI
 langchain==0.0.200
-openai==0.27.8
 
 # Pinecone for vector storage
 pinecone-client==2.2.2
@@ -20,3 +19,10 @@ streamlit==1.24.0
 # Additional utilities
 pydantic==1.10.7
 requests==2.28.2
+
+# Add alternative LLM providers
+transformers==4.38.2
+torch==2.2.1
+sentence-transformers==2.5.1
+groq==0.4.2  # For Groq
+cohere==4.51  # For Cohere

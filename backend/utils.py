@@ -1,14 +1,24 @@
+from fastapi import HTTPException, UploadFile
 from langchain.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Pinecone
+from langchain.chains import RetrievalQA
 import pinecone
 import os
+from llm_config import get_llm, get_embeddings, LLMProvider
 
 # Initialize Pinecone
-pinecone.init(api_key=os.getenv("PINECONE_API_KEY"), environment=os.getenv("PINECONE_ENVIRONMENT"))
+pinecone.init(api_key=os.getenv("PINECONE_API_KEY"), 
+              environment=os.getenv("PINECONE_ENVIRONMENT"))
+
+# Get current LLM provider from environment
+current_provider = LLMProvider(os.getenv("LLM_PROVIDER", "mistral"))
+
+# Global variable for Pinecone index
+pinecone_index = None
 
 def process_uploaded_file(file: UploadFile):
+    global pinecone_index
     if file.content_type != "text/plain":
         raise HTTPException(status_code=400, detail="File must be a text file")
     
@@ -25,18 +35,23 @@ def process_uploaded_file(file: UploadFile):
     texts = text_splitter.split_documents(documents)
     
     # Create embeddings and store in Pinecone
-    embeddings = OpenAIEmbeddings()
-    pinecone_index = Pinecone.from_documents(texts, embeddings, index_name="your-index-name")
+    embeddings = get_embeddings(current_provider)
+    pinecone_index = Pinecone.from_documents(
+        texts, 
+        embeddings, 
+        index_name="your-index-name"
+    )
     
     return {"message": "File uploaded and processed successfully"}
 
 def query_chatbot(query: str):
+    global pinecone_index
     if pinecone_index is None:
         raise HTTPException(status_code=400, detail="No documents uploaded yet")
     
-    # Create the QA chain
+    # Create the QA chain with the selected LLM
     qa = RetrievalQA.from_chain_type(
-        llm=OpenAI(),
+        llm=get_llm(current_provider),
         chain_type="stuff",
         retriever=pinecone_index.as_retriever()
     )
