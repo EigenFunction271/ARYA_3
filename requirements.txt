@@ -1,28 +1,30 @@
 # Core dependencies
-fastapi==0.95.2
-uvicorn==0.22.0
-python-multipart==0.0.6
+fastapi>=0.95.2
+uvicorn>=0.22.0
+python-multipart>=0.0.6
 
-# LangChain and OpenAI
-langchain==0.0.200
+# LangChain and related
+langchain>=0.1.0
+langchain-core>=0.1.0
+langchain-community>=0.0.10
 
-# Pinecone for vector storage
-pinecone-client==2.2.2
+# Vector storage
+pinecone-client>=2.2.2
 
 # Authentication and security
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
 
-# Frontend (Streamlit)
-streamlit==1.24.0
+# Frontend
+streamlit>=1.24.0
 
-# Additional utilities
-pydantic==1.10.7
-requests==2.28.2
+# Core utilities
+pydantic>=2.7.0
+requests>=2.28.2
 
-# Add alternative LLM providers
-transformers==4.38.2
-torch==2.2.1
-sentence-transformers==2.5.1
-groq==0.4.2  # For Groq
-cohere==4.51  # For Cohere
+# LLM providers and ML
+transformers>=4.38.2
+torch>=2.3.1
+sentence-transformers>=2.5.1
+groq>=0.4.2
+cohere>=4.51
