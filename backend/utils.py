@@ -7,9 +7,12 @@ import pinecone
 import os
 from llm_config import get_llm, get_embeddings, LLMProvider
 
-# Initialize Pinecone
-pinecone.init(api_key=os.getenv("PINECONE_API_KEY"), 
-              environment=os.getenv("PINECONE_ENVIRONMENT"))
+# Initialize Pinecone with host
+pinecone.init(
+    api_key=os.getenv("PINECONE_API_KEY"), 
+    environment=os.getenv("PINECONE_ENVIRONMENT"),
+    host=os.getenv("PINECONE_HOST")
+)
 
 # Get current LLM provider from environment
 current_provider = LLMProvider(os.getenv("LLM_PROVIDER", "mistral"))
@@ -39,7 +42,7 @@ def process_uploaded_file(file: UploadFile):
     pinecone_index = Pinecone.from_documents(
         texts, 
         embeddings, 
-        index_name="your-index-name"
+        index_name=os.getenv("PINECONE_INDEX_NAME", "arya-embeddings")
     )
     
     return {"message": "File uploaded and processed successfully"}

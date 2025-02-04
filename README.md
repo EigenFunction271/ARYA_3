@@ -63,6 +63,71 @@ LLM_PROVIDER=mistral  # Options: mistral, deepseek, groq, cohere
    - Create an index with dimension 768 (for default embeddings)
    - Update the index name in `backend/utils.py`
 
+## Pinecone Setup
+
+1. **Create Pinecone Account:**
+   - Go to https://app.pinecone.io/
+   - Sign up for a free account
+
+2. **Find Your Environment Details:**
+   - In Pinecone Console, click on your index "arya-embeddings"
+   - Note the following details:
+     - Cloud: AWS
+     - Region: us-east-1
+     - Host: Your full host URL (ends with .pinecone.io)
+
+3. **Create Index:**
+   ```bash
+   # Index Configuration
+   Name: arya-embeddings (or your preferred name)
+   Dimensions: 768 (for sentence-transformers embeddings)
+   Metric: cosine
+   ```
+   Steps:
+   - Click "Create Index" in Pinecone Console
+   - Enter "arya-embeddings" as the index name
+   - Set Dimensions to 768
+   - Choose "cosine" as the metric
+   - Select "gcp-starter" as the environment
+   - Click "Create Index"
+
+3. **Get Environment Details:**
+   - After creating the index, note your environment:
+     - For free tier: Usually `gcp-starter` or `asia-southeast1-gcp-free`
+     - You can find this in the Pinecone console under "API Keys"
+
+4. **Update .env file:**
+   ```env
+   PINECONE_API_KEY=your_api_key_here
+   PINECONE_ENVIRONMENT=us-east-1
+   PINECONE_INDEX_NAME=arya-embeddings
+   ```
+
+4. **Verify Connection:**
+   ```python
+   # Save as check_pinecone.py
+   import os
+   import pinecone
+   from dotenv import load_dotenv
+
+   load_dotenv()
+
+   # Initialize Pinecone with correct environment
+   pinecone.init(
+       api_key=os.getenv("PINECONE_API_KEY"),
+       environment="us-east-1"  # AWS region
+   )
+
+   # Should show "arya-embeddings"
+   print("Available indexes:", pinecone.list_indexes())
+
+   # Get index details
+   index = pinecone.Index("arya-embeddings")
+   print("\nIndex description:", index.describe_index_stats())
+   ```
+
+> Note: The environment value should match your AWS region (us-east-1) rather than the previously mentioned gcp-starter.
+
 ## Running the Application
 
 1. Start the backend:
@@ -205,10 +270,40 @@ MIT License
 ## Security and API Keys Setup
 
 1. **Required API Keys:**
-   - Pinecone: Sign up at https://www.pinecone.io/
-   - HuggingFace: Get API key at https://huggingface.co/settings/tokens
-   - Groq (Optional): Sign up at https://console.groq.com/
-   - Cohere (Optional): Get API key at https://dashboard.cohere.com/api-keys
+
+   a) **Pinecone:**
+   - Go to https://app.pinecone.io/
+   - Sign up for a free account
+   - Click "API Keys" in the left sidebar
+   - Copy your API key and environment details
+
+   b) **HuggingFace:**
+   - Go to https://huggingface.co/
+   - Create an account or sign in
+   - Visit https://huggingface.co/settings/tokens
+   - Click "New token"
+   - Give it a name (e.g., "rag-chatbot")
+   - Select "read" access
+   - Copy the generated token
+
+   c) **Groq (Optional):**
+   - Visit https://console.groq.com/
+   - Sign up for an account
+   - Click on "API Keys" in the dashboard
+   - Click "Create API Key"
+   - Give it a name (e.g., "rag-chatbot")
+   - Copy the API key (starts with "gsk_")
+   - Note: New users get free credits
+
+   d) **Cohere (Optional):**
+   - Go to https://dashboard.cohere.com/
+   - Create an account
+   - Navigate to https://dashboard.cohere.com/api-keys
+   - Click "Create API Key"
+   - Select "Trial" access
+   - Name your key (e.g., "rag-chatbot")
+   - Copy the generated key
+   - Note: Free tier includes 5M tokens/month
 
 2. **Generate JWT Secret:**
 ```bash
@@ -226,28 +321,61 @@ python -c "import secrets; print(secrets.token_hex(32))"
    ```
    - Add your keys to `.env`:
    ```env
+   # Vector DB
    PINECONE_API_KEY=your_pinecone_key
-   PINECONE_ENVIRONMENT=your_environment
+   PINECONE_ENVIRONMENT=us-east-1
+   PINECONE_INDEX_NAME=arya-embeddings
+   PINECONE_HOST=your_pinecone_host
+
+   # Auth
    JWT_SECRET_KEY=generated_secret
-   HUGGINGFACE_API_KEY=your_huggingface_key
-   GROQ_API_KEY=your_groq_key
-   COHERE_API_KEY=your_cohere_key
+
+   # LLM Providers
+   HUGGINGFACE_API_KEY=your_huggingface_key  # Required for Mistral
+   GROQ_API_KEY=your_groq_key                # Optional
+   COHERE_API_KEY=your_cohere_key           # Optional
+
+   # Current LLM Provider
+   LLM_PROVIDER=mistral
    ```
 
-4. **Production Deployment:**
-   - Never commit `.env` file
-   - Set environment variables in your deployment platform
-   - For Docker: Use `--env-file` or environment variables
-   - For Heroku/Railway: Use platform's secrets management
+4. **Verify API Keys:**
+```python
+# Save as test_api_keys.py
+import os
+from dotenv import load_dotenv
+from llm_config import get_llm, LLMProvider
 
-5. **Verify Security:**
-```bash
-# Check if .env is ignored
-git check-ignore .env
+load_dotenv()
 
-# Check for sensitive files before committing
-git status
+def test_key(provider: str, env_var: str):
+    key = os.getenv(env_var)
+    print(f"\n{provider} API Key:")
+    print(f"- Present: {bool(key)}")
+    print(f"- Length: {len(key) if key else 0}")
+    print(f"- Format: {'Valid' if key and len(key) > 20 else 'Invalid'}")
+
+# Test each provider
+test_key("HuggingFace", "HUGGINGFACE_API_KEY")
+test_key("Groq", "GROQ_API_KEY")
+test_key("Cohere", "COHERE_API_KEY")
 ```
+
+5. **API Key Usage Limits:**
+
+   - **HuggingFace:**
+     - Free tier: Rate limited
+     - Recommended for development
+
+   - **Groq:**
+     - Free credits for new users
+     - Pay-as-you-go after credits
+     - Fast inference speeds
+
+   - **Cohere:**
+     - 5M tokens/month free
+     - Rate limits apply
+     - Good for production use
 
 > ⚠️ **Security Note**: Never commit API keys or secrets to version control. Always use environment variables or secure secrets management in production.
 
