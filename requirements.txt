@@ -1,37 +1,39 @@
 # Core dependencies
-fastapi~=0.109.0
-uvicorn~=0.27.0
-python-multipart~=0.0.6
+fastapi==0.109.0
+uvicorn==0.27.1
+python-multipart==0.0.6
 
 # LangChain and related
-langchain==0.1.0
-langchain-core==0.1.53
-langsmith>=0.1.0,<0.2.0
-langchain-community~=0.0.10
+langchain==0.0.350
+langchain-core==0.1.23
+langsmith==0.0.77
+langchain-community==0.0.10
+
 
 
 # Vector storage
-pinecone-client~=2.2.2
+pinecone-client==2.2.4
+
 
 # Authentication and security
-python-jose[cryptography]~=3.3.0
-passlib[bcrypt]~=1.7.4
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
 
 # Frontend
-streamlit~=1.31.0
+streamlit==1.31.0
 
 # Core utilities
-pydantic>=2.5.0,<3.0.0
-requests~=2.31.0
-email-validator~=2.1.0
-supabase~=1.2.0
-pypdf~=3.9.0
-python-magic-bin~=0.4.14
+pydantic==2.5.2
+requests==2.31.0
+email-validator==2.1.0
+supabase==1.2.0
+pypdf==3.9.0
+python-magic-bin==0.4.14
 
 # LLM providers and ML
-transformers~=4.38.2
-torch~=2.3.1
-torchaudio~=2.3.1
-sentence-transformers~=2.5.1
-groq~=0.4.2
-cohere~=4.51
+transformers==4.38.2
+torch==2.3.1
+torchaudio==2.3.1
+sentence-transformers==2.5.1
+groq==0.4.2
+cohere==4.51

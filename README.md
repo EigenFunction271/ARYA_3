@@ -16,10 +16,67 @@ A Retrieval-Augmented Generation (RAG) chatbot system that allows users to uploa
 
 - Python 3.9+
 - Pinecone Account
+- Supabase Account
 - One or more of the following API keys:
   - HuggingFace API key (for Mistral/Deepseek)
   - Groq API key
   - Cohere API key
+
+## Supabase Setup
+
+1. **Create Supabase Project:**
+   - Go to https://supabase.com/
+   - Create a new project
+   - Note your project URL and anon/public API key
+
+2. **Create Storage Bucket:**
+   ```sql
+   -- In Supabase SQL Editor
+   insert into storage.buckets (id, name)
+   values ('documents', 'documents');
+   ```
+
+3. **Create Documents Table:**
+   ```sql
+   create table public.documents (
+     id uuid primary key,
+     filename text not null,
+     uploader_email text not null,
+     pinecone_namespace text,
+     upload_date timestamp with time zone default now(),
+     file_type text not null,
+     status text default 'active',
+     page_count integer,
+     file_size integer,
+     created_at timestamp with time zone default now()
+   );
+
+   -- Add RLS policies
+   alter table public.documents enable row level security;
+
+   -- Allow users to see their own documents
+   create policy "Users can view their own documents"
+     on documents for select
+     using (uploader_email = auth.jwt() ->> 'email');
+
+   -- Allow users to upload documents
+   create policy "Users can upload documents"
+     on documents for insert
+     with check (uploader_email = auth.jwt() ->> 'email');
+   ```
+
+4. **Storage Policies:**
+   ```sql
+   -- Allow read access to authenticated users
+   create policy "Allow authenticated read access"
+     on storage.objects for select
+     using (auth.role() = 'authenticated');
+
+   -- Allow uploads to authenticated users
+   create policy "Allow authenticated uploads"
+     on storage.objects for insert
+     with check (auth.role() = 'authenticated');
+   ```
 
 ## Setup
 
@@ -45,17 +102,23 @@ pip install -r requirements.txt
 # Vector DB
 PINECONE_API_KEY=your_pinecone_key
 PINECONE_ENVIRONMENT=your_environment
+PINECONE_INDEX_NAME=arya-embeddings
+PINECONE_HOST=your_pinecone_host
 
 # Auth
 JWT_SECRET_KEY=your_secret_key
 
-# LLM Providers (add the ones you plan to use)
+# LLM Providers
 HUGGINGFACE_API_KEY=your_huggingface_key
 GROQ_API_KEY=your_groq_key
 COHERE_API_KEY=your_cohere_key
 
 # Current LLM Provider
-LLM_PROVIDER=mistral  # Options: mistral, deepseek, groq, cohere
+LLM_PROVIDER=mistral
+
+# Document Storage
+SUPABASE_URL=your_project_url
+SUPABASE_KEY=your_anon_key
 ```
 
 5. Initialize Pinecone:
@@ -207,6 +270,10 @@ streamlit run app.py
    
    # Current LLM Provider
    LLM_PROVIDER = "mistral"
+   
+   # Document Storage
+   SUPABASE_URL = "your-project-url"
+   SUPABASE_KEY = "your-anon-key"
    ```
 
 5. **Frontend Requirements:**
@@ -567,3 +634,20 @@ Common Issues:
 - 403 Forbidden: Verify you're using an admin account for restricted endpoints
 - 500 Server Error: Check the logs for details
 - Connection Error: Verify your API keys and network connection
+
+### Troubleshooting Supabase
+
+1. **Storage Issues:**
+   - Check bucket permissions in Supabase dashboard
+   - Verify RLS policies are correctly set
+   - Ensure file size is within limits
+
+2. **Database Issues:**
+   - Check table structure matches Document model
+   - Verify RLS policies allow intended operations
+   - Monitor storage usage in Supabase dashboard
+
+3. **Common Errors:**
+   - 403: Check authentication and RLS policies
+   - 413: File size too large
+   - Storage not found: Verify bucket exists
