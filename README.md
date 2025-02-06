@@ -86,18 +86,32 @@ git clone https://github.com/yourusername/rag-chatbot.git
 cd rag-chatbot
 ```
 
-2. Create and activate a virtual environment:
+2. Install system dependencies:
+
+```bash
+# On Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install libmagic1
+
+# On macOS
+brew install libmagic
+
+# On Windows
+# No additional steps needed - magic patterns included in python-magic
+```
+
+3. Create and activate a virtual environment:
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-3. Install dependencies:
+4. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Create a `.env` file in the root directory:
+5. Create a `.env` file in the root directory:
 ```env
 # Vector DB
 PINECONE_API_KEY=your_pinecone_key
@@ -121,7 +135,7 @@ SUPABASE_URL=your_project_url
 SUPABASE_KEY=your_anon_key
 ```
 
-5. Initialize Pinecone:
+6. Initialize Pinecone:
    - Create a Pinecone account
    - Create an index with dimension 768 (for default embeddings)
    - Update the index name in `backend/utils.py`
@@ -651,3 +665,28 @@ Common Issues:
    - 403: Check authentication and RLS policies
    - 413: File size too large
    - Storage not found: Verify bucket exists
+
+### Troubleshooting
+
+#### Python-magic Issues:
+
+1. **Linux/macOS:**
+   ```bash
+   # If you see "ImportError: failed to find libmagic"
+   # Ubuntu/Debian:
+   sudo apt-get install libmagic1
+   
+   # macOS:
+   brew install libmagic
+   ```
+
+2. **Windows:**
+   - python-magic includes magic patterns, no additional setup needed
+   - If you encounter issues, try:
+     ```bash
+     pip uninstall python-magic
+     pip install python-magic-bin  # Windows-specific alternative
+     ```
+
+Common Issues:
+- 401 Unauthorized: Check your JWT token

@@ -21,10 +21,17 @@ class DocumentManager:
         )
     
     def _detect_file_type(self, content: bytes) -> FileType:
-        mime = magic.from_buffer(content, mime=True)
-        if mime not in self.ALLOWED_MIMETYPES:
-            raise ValueError(f"Unsupported file type: {mime}")
-        return self.ALLOWED_MIMETYPES[mime]
+        try:
+            mime = magic.from_buffer(content, mime=True)
+            if mime not in self.ALLOWED_MIMETYPES:
+                raise ValueError(f"Unsupported file type: {mime}")
+            return self.ALLOWED_MIMETYPES[mime]
+        except magic.MagicException as e:
+            # Handle potential libmagic errors
+            raise ValueError(f"Error detecting file type: {str(e)}")
+        except Exception as e:
+            # Handle any other unexpected errors
+            raise ValueError(f"Unexpected error during file type detection: {str(e)}")
     
     def _extract_text(self, content: bytes, file_type: FileType) -> Tuple[str, dict]:
         metadata = {}
