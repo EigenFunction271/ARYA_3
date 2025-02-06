@@ -3,6 +3,7 @@ from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.vectorstores import Pinecone
 from langchain.chains import RetrievalQA
+from langchain.callbacks.manager import CallbackManager
 import pinecone
 import os
 from llm_config import get_llm, get_embeddings, LLMProvider
@@ -53,14 +54,15 @@ def query_chatbot(query: str):
     if pinecone_index is None:
         raise HTTPException(status_code=400, detail="No documents uploaded yet")
     
-    # Create the QA chain with the selected LLM
+    # Create the QA chain with callbacks
     qa = RetrievalQA.from_chain_type(
         llm=get_llm(current_provider),
         chain_type="stuff",
-        retriever=pinecone_index.as_retriever()
+        retriever=pinecone_index.as_retriever(),
+        return_source_documents=True,  # Optional: return source docs
+        callbacks=CallbackManager([])  # Empty callback manager if not using langsmith
     )
     
     # Get the response
     response = qa.run(query)
-    
     return {"response": response}
