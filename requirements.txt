@@ -6,10 +6,9 @@ python-multipart==0.0.6
 
 # LangChain and related
 langchain==0.0.350
-langchain-core==0.1.23
+langchain-core==0.1.13
 langchain-community==0.0.10
-langchainplus-sdk<0.0.20
-langsmith==0.0.77
+langsmith==0.0.83
 
 
 
@@ -25,12 +24,12 @@ passlib[bcrypt]==1.7.4
 streamlit==1.31.0
 
 # Core utilities
-pydantic==2.5.2
+pydantic>=1.9.0,<2.0.0
 requests==2.31.0
 email-validator==2.1.0
 supabase==1.2.0
 pypdf==3.9.0
-python-magic==0.4.27  # Using python-magic instead of python-magic-bin
+python-magic==0.4.27  # Replaced python-magic-bin with python-magic
 
 # LLM providers and ML
 transformers==4.38.2
