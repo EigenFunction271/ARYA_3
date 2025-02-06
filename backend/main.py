@@ -17,13 +17,15 @@ from models import User
 from models.chat import ChatSession, Message
 from utils import process_uploaded_file, query_chatbot
 from session_manager import SessionManager
-from llm_config import LLMProvider
+from llm_config import LLMProvider, get_embeddings
 
 app = FastAPI()
 session_manager = SessionManager()
 
-# Add LLM provider configuration
-current_provider = LLMProvider(os.getenv("LLM_PROVIDER", "mistral"))
+# Create embeddings and store in Pinecone
+llm_provider_value = os.getenv("LLM_PROVIDER", "mistral").split('#')[0].strip()
+current_provider = LLMProvider(llm_provider_value)
+embeddings = get_embeddings(current_provider)
 
 # CORS middleware configuration
 app.add_middleware(

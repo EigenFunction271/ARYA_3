@@ -1,7 +1,7 @@
 from fastapi import HTTPException, UploadFile
-from langchain.document_loaders import TextLoader
+from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.vectorstores import Pinecone
+from langchain_community.vectorstores import Pinecone
 from langchain.chains import RetrievalQA
 import pinecone
 import os
@@ -15,7 +15,8 @@ pinecone.init(
 )
 
 # Get current LLM provider from environment
-current_provider = LLMProvider(os.getenv("LLM_PROVIDER", "mistral"))
+llm_provider_value = os.getenv("LLM_PROVIDER", "mistral").split('#')[0].strip()
+current_provider = LLMProvider(llm_provider_value)
 
 # Global variable for Pinecone index
 pinecone_index = None

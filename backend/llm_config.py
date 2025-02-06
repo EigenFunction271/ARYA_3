@@ -1,7 +1,8 @@
 import os
 from enum import Enum
-from langchain_community.llms import HuggingFaceHub, Groq, Cohere
+from langchain_community.llms import HuggingFaceHub, Cohere
 from langchain_community.embeddings import HuggingFaceEmbeddings, CohereEmbeddings
+from groq import Groq  # Import directly from groq package
 
 class LLMProvider(str, Enum):
     MISTRAL = "mistral"
@@ -9,17 +10,11 @@ class LLMProvider(str, Enum):
     GROQ = "groq"
     COHERE = "cohere"
 
-def get_llm(provider: LLMProvider = LLMProvider.MISTRAL):
-    """Get LLM based on provider"""
-    if provider == LLMProvider.MISTRAL:
+def get_llm(provider: LLMProvider):
+    if provider in [LLMProvider.MISTRAL, LLMProvider.DEEPSEEK]:
         return HuggingFaceHub(
-            repo_id="mistralai/Mistral-7B-Instruct-v0.2",
-            model_kwargs={"temperature": 0.7, "max_length": 512}
-        )
-    elif provider == LLMProvider.DEEPSEEK:
-        return HuggingFaceHub(
-            repo_id="deepseek-ai/deepseek-coder-7b-instruct",
-            model_kwargs={"temperature": 0.7, "max_length": 512}
+            repo_id=f"mistralai/{provider}" if provider == LLMProvider.MISTRAL else "deepseek-ai/deepseek-llm-7b-chat",
+            huggingface_api_token=os.getenv("HUGGINGFACE_API_KEY")
         )
     elif provider == LLMProvider.GROQ:
         return Groq(
@@ -31,10 +26,11 @@ def get_llm(provider: LLMProvider = LLMProvider.MISTRAL):
             api_key=os.getenv("COHERE_API_KEY"),
             model="command"
         )
+    else:
+        raise ValueError(f"Unknown provider: {provider}")
 
-def get_embeddings(provider: LLMProvider = LLMProvider.MISTRAL):
-    """Get embeddings based on provider"""
-    if provider in [LLMProvider.MISTRAL, LLMProvider.DEEPSEEK]:
+def get_embeddings(provider: LLMProvider):
+    if provider in [LLMProvider.MISTRAL, LLMProvider.DEEPSEEK, LLMProvider.GROQ]:
         return HuggingFaceEmbeddings(
             model_name="sentence-transformers/all-mpnet-base-v2"
         )
@@ -43,7 +39,6 @@ def get_embeddings(provider: LLMProvider = LLMProvider.MISTRAL):
             api_key=os.getenv("COHERE_API_KEY")
         )
     else:
-        # Default to HuggingFace embeddings for other providers
         return HuggingFaceEmbeddings(
             model_name="sentence-transformers/all-mpnet-base-v2"
         ) 

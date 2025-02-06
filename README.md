@@ -157,23 +157,96 @@ streamlit run app.py
 
 ## Deployment
 
-### Frontend (Free Options)
+### Frontend (Streamlit Community Cloud)
 
-1. **Streamlit Community Cloud** (Recommended):
-   - Sign up at https://share.streamlit.io/
-   - Connect your GitHub repository
-   - Select the `frontend/app.py` file
-   - Add your environment variables in Streamlit's secrets management
-   - Deploy (automatically updates with your repository)
-
-2. **GitHub Pages** (Alternative):
-   - Create a static build of the Streamlit app:
-   ```bash
-   cd frontend
-   streamlit run app.py --browser.serverAddress="0.0.0.0" --server.port=8501 --server.address="0.0.0.0"
+1. **Prepare Your Repository:**
+   - Ensure your code is in a GitHub repository
+   - Repository structure should be:
    ```
-   - Enable GitHub Pages in your repository settings
-   - Deploy the static files to the `gh-pages` branch
+   ├── frontend/
+   │   ├── app.py          # Streamlit application
+   │   └── requirements.txt # Frontend dependencies
+   ├── backend/
+   │   └── ...            # Backend files
+   └── requirements.txt    # Main requirements
+   ```
+
+2. **Create Streamlit Account:**
+   - Go to https://share.streamlit.io/
+   - Sign in with GitHub
+   - Click "New app"
+
+3. **Deploy Settings:**
+   ```
+   Repository: your-github-username/rag-chatbot
+   Branch: main
+   Main file path: frontend/app.py
+   Python version: 3.9
+   ```
+
+4. **Environment Variables:**
+   - In Streamlit Cloud, go to "Advanced settings"
+   - Add the following secrets in the "Secrets" field:
+   ```toml
+   [env]
+   BACKEND_URL = "your-backend-url"  # e.g., "https://your-backend.onrender.com"
+   
+   # Vector DB
+   PINECONE_API_KEY = "your-pinecone-key"
+   PINECONE_ENVIRONMENT = "us-east-1"
+   PINECONE_INDEX_NAME = "arya-embeddings"
+   PINECONE_HOST = "your-pinecone-host"
+   
+   # Auth
+   JWT_SECRET_KEY = "your-jwt-secret"
+   
+   # LLM Providers
+   HUGGINGFACE_API_KEY = "your-huggingface-key"
+   GROQ_API_KEY = "your-groq-key"
+   COHERE_API_KEY = "your-cohere-key"
+   
+   # Current LLM Provider
+   LLM_PROVIDER = "mistral"
+   ```
+
+5. **Frontend Requirements:**
+   Create `frontend/requirements.txt`:
+   ```text
+   streamlit>=1.24.0
+   requests>=2.28.2
+   python-jose[cryptography]>=3.3.0
+   ```
+
+6. **Deploy:**
+   - Click "Deploy!"
+   - Wait for the build to complete
+   - Your app will be available at `https://share.streamlit.io/your-username/rag-chatbot`
+
+7. **Troubleshooting:**
+   - Check "Manage app" → "Logs" for any issues
+   - Ensure all environment variables are set correctly
+   - Verify the backend URL is accessible from Streamlit Cloud
+   - Check that the Python version matches your requirements
+
+> Note: Make sure your backend is deployed and accessible before deploying the frontend, as Streamlit will need to communicate with it.
+
+### Updating the Deployment
+
+1. **Push Changes:**
+   ```bash
+   git add .
+   git commit -m "Update application"
+   git push origin main
+   ```
+
+2. **Redeployment:**
+   - Streamlit Cloud automatically redeploys when you push to the main branch
+   - You can also manually trigger a redeployment from the Streamlit Cloud dashboard
+
+3. **Monitor:**
+   - Watch the deployment logs for any errors
+   - Test the application after each deployment
+   - Check that environment variables are still properly set
 
 ### Backend (Free Options)
 

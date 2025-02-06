@@ -7,6 +7,7 @@ python-multipart>=0.0.6
 langchain>=0.1.0
 langchain-core>=0.1.0
 langchain-community>=0.0.10
+langchainplus-sdk<0.0.20  # Pin to last version that works with pydantic v2
 
 # Vector storage
 pinecone-client>=2.2.2
@@ -19,12 +20,13 @@ passlib[bcrypt]>=1.7.4
 streamlit>=1.24.0
 
 # Core utilities
-pydantic>=2.7.0
+pydantic>=2.7.0  # Updated to resolve pydantic-settings dependency
 requests>=2.28.2
 
 # LLM providers and ML
 transformers>=4.38.2
 torch>=2.3.1
+torchaudio>=2.3.1
 sentence-transformers>=2.5.1
 groq>=0.4.2
 cohere>=4.51
