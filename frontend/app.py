@@ -126,3 +126,42 @@ if "access_token" in st.session_state:
 
 else:
     st.warning("Please log in to access the chatbot")
+
+def show_register_page():
+    st.title("Register")
+    
+    with st.form("register_form"):
+        email = st.text_input("Email")
+        password = st.text_input("Password", type="password")
+        
+        if st.form_submit_button("Register"):
+            response = requests.post(
+                f"{BACKEND_URL}/register",
+                json={"email": email, "password": password}
+            )
+            if response.status_code == 200:
+                st.success("Registration successful! Please log in.")
+                st.session_state.page = "login"
+            else:
+                st.error(f"Registration failed: {response.json()['detail']}")
+
+def show_login_page():
+    st.title("Login")
+    
+    with st.form("login_form"):
+        email = st.text_input("Email")
+        password = st.text_input("Password", type="password")
+        
+        if st.form_submit_button("Login"):
+            response = requests.post(
+                f"{BACKEND_URL}/token",
+                data={"username": email, "password": password}  # OAuth2 form expects 'username'
+            )
+            if response.status_code == 200:
+                token_data = response.json()
+                st.session_state["access_token"] = token_data["access_token"]
+                st.session_state["email"] = email
+                st.session_state.page = "chat"
+                st.experimental_rerun()
+            else:
+                st.error("Invalid email or password")

@@ -18,6 +18,8 @@ from models.chat import ChatSession, Message
 from utils import process_uploaded_file, query_chatbot
 from session_manager import SessionManager
 from llm_config import LLMProvider, get_embeddings
+from models.user import UserCreate, UserRole
+from user_manager import UserManager
 
 app = FastAPI()
 session_manager = SessionManager()
@@ -26,6 +28,9 @@ session_manager = SessionManager()
 llm_provider_value = os.getenv("LLM_PROVIDER", "mistral").split('#')[0].strip()
 current_provider = LLMProvider(llm_provider_value)
 embeddings = get_embeddings(current_provider)
+
+# Initialize user manager
+user_manager = UserManager()
 
 # CORS middleware configuration
 app.add_middleware(
@@ -133,6 +138,27 @@ async def set_llm_provider(
     global current_provider
     current_provider = provider
     return {"message": f"LLM provider changed to {provider}"}
+
+@app.post("/register")
+async def register_user(user: UserCreate):
+    """Register a new user"""
+    try:
+        db_user = user_manager.create_user(user)
+        return {"message": "User created successfully"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/users/{username}/role")
+async def set_user_role(
+    username: str,
+    role: UserRole,
+    current_user: User = Depends(get_current_admin_user)
+):
+    """Set user role (admin only)"""
+    db_user = user_manager.set_user_role(username, role)
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"message": f"Role updated to {role}"}
 
 if __name__ == "__main__":
     import uvicorn

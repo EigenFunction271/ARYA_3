@@ -4,6 +4,10 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from pydantic import BaseModel
 from fastapi import Depends, HTTPException, status
+from user_manager import UserManager
+
+# Initialize user manager at module level
+user_manager = UserManager()
 
 # Security settings
 SECRET_KEY = "your-secret-key"
@@ -32,19 +36,20 @@ fake_users_db = {
 
 # Token data model
 class TokenData(BaseModel):
-    username: str | None = None
+    email: str | None = None
 
 # Verify password
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 # Authenticate user
-def authenticate_user(username: str, password: str):
-    if username in fake_users_db:
-        user_dict = fake_users_db[username]
-        if verify_password(password, user_dict["hashed_password"]):
-            return user_dict
-    return None
+def authenticate_user(email: str, password: str):
+    user = user_manager.get_user(email)
+    if not user:
+        return False
+    if not user_manager.verify_password(password, user.password):
+        return False
+    return user
 
 # Create access token
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
@@ -66,13 +71,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
+        email: str = payload.get("sub")
+        if email is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
+        token_data = TokenData(email=email)
     except JWTError:
         raise credentials_exception
-    user = fake_users_db.get(token_data.username)
+        
+    user = user_manager.get_user(token_data.email)
     if user is None:
         raise credentials_exception
     return user
