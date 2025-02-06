@@ -20,6 +20,9 @@ from session_manager import SessionManager
 from llm_config import LLMProvider, get_embeddings
 from models.user import UserCreate, UserRole
 from user_manager import UserManager
+from document_manager import DocumentManager
+from langchain.text_splitter import CharacterTextSplitter
+from langchain.vectorstores import Pinecone
 
 app = FastAPI()
 session_manager = SessionManager()
@@ -32,6 +35,9 @@ embeddings = get_embeddings(current_provider)
 # Initialize user manager
 user_manager = UserManager()
 
+# Initialize document manager
+document_manager = DocumentManager()
+
 # CORS middleware configuration
 app.add_middleware(
     CORSMiddleware,
@@ -43,11 +49,43 @@ app.add_middleware(
 
 @app.post("/upload/")
 async def upload_file(
-    file: UploadFile = File(...), 
-    user: User = Depends(get_current_admin_user)
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user)
 ):
-    """Upload and process a document (admin only)"""
-    return process_uploaded_file(file)
+    # Read file content
+    content = await file.read()
+    
+    try:
+        # Store document and get metadata
+        document, text_content = await document_manager.store_document(
+            content,
+            file.filename,
+            current_user.email
+        )
+        
+        # Process for RAG
+        text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+        texts = text_splitter.split_text(text_content)
+        
+        # Store in Pinecone with document namespace
+        embeddings = get_embeddings(current_provider)
+        Pinecone.from_texts(
+            texts,
+            embeddings,
+            index_name=os.getenv("PINECONE_INDEX_NAME"),
+            namespace=document.id
+        )
+        
+        return {
+            "message": "File uploaded and processed successfully",
+            "document_id": document.id,
+            "file_type": document.file_type,
+            "file_size": document.file_size,
+            "page_count": document.page_count
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/chat/session")
 async def create_chat_session(
